@@ -12,6 +12,8 @@ from chainlit.logger import logger
 if env_found:
     logger.info(f"Loaded {env_file} file")
 
+logger.info("✅You're in custom Chainlit...")
+
 import asyncio
 from typing import TYPE_CHECKING, Any, Dict
 
