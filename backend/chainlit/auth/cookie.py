@@ -8,6 +8,7 @@ from fastapi.security.utils import get_authorization_scheme_param
 from starlette.status import HTTP_401_UNAUTHORIZED
 
 from chainlit.config import config
+from chainlit.logger import logger
 
 """ Module level cookie settings. """
 _cookie_samesite = cast(
@@ -182,6 +183,13 @@ def set_oauth_state_cookie(response: Response, token: str):
         max_age=_state_cookie_lifetime,
         path=_cookie_path,
     )
+    if _cookie_path != "/":
+        response.delete_cookie(
+            _state_cookie_name,
+            path="/",
+            secure=_cookie_secure,
+            samesite=_cookie_samesite,
+        )
 
 
 def validate_oauth_state_cookie(request: Request, state: str):
@@ -190,6 +198,13 @@ def validate_oauth_state_cookie(request: Request, state: str):
     oauth_state = request.cookies.get(_state_cookie_name)
 
     if oauth_state != state:
+        logger.info("⌛OAuth state mismatch: expected %s, got %s", oauth_state, state)
+        logger.info(
+            "⌛_cookie_samesite: %s, _cookie_secure: %s, _cookie_path: %s",
+            _cookie_samesite,
+            _cookie_secure,
+            _cookie_path,
+        )
         raise Exception("oauth state does not correspond")
 
 
