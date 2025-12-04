@@ -1,6 +1,5 @@
 import os
 from typing import Literal, Optional, cast
-from urllib.parse import quote, unquote
 
 from fastapi import Request, Response
 from fastapi.exceptions import HTTPException
@@ -177,7 +176,7 @@ def clear_auth_cookie(request: Request, response: Response):
 def set_oauth_state_cookie(response: Response, token: str):
     response.set_cookie(
         _state_cookie_name,
-        quote(token),
+        token,
         httponly=True,
         samesite=_cookie_samesite,
         secure=_cookie_secure,
@@ -197,8 +196,6 @@ def validate_oauth_state_cookie(request: Request, state: str):
     """Check the state from the oauth provider against the browser cookie."""
 
     oauth_state = request.cookies.get(_state_cookie_name)
-    if oauth_state:
-        oauth_state = unquote(oauth_state)
 
     if oauth_state != state:
         logger.info("⌛OAuth state mismatch: expected %s, got %s", oauth_state, state)
